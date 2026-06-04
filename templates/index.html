@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Based Tuberculosis Detection System</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=1.2">
+    <script src="/static/js/script.js?v=1.2" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <div class="logo-box">
+                <span class="logo-icon">🫁</span>
+                <div class="logo-text">
+                    <span class="brand-name">TB Detection AI</span>
+                    <span class="brand-subtext">AI-Powered Clinical Decision Support</span>
+                </div>
+            </div>
+        </div>
+        <ul class="nav-links">
+            <li class="active"><a href="/" onclick="window.location.href='/'; return true;">Dashboard</a></li>
+            <li><a href="/reports" onclick="window.location.href='/reports'; return true;">Reports</a></li>
+            <li><a href="/recommendations"
+                    onclick="window.location.href='/recommendations'; return true;">Recommendations</a></li>
+            <li><a href="/about" onclick="window.location.href='/about'; return true;">About</a></li>
+        </ul>
+        <div class="nav-user">
+            <span class="user-welcome">Welcome, {{ session['username'] }}</span>
+            <a href="/logout" class="btn-signout">Sign Out</a>
+        </div>
+    </nav>
+
+    <div class="info-bar">
+        <span class="info-item">🧠 Model: ResNet-50 (Optimized) | Explainability: Grad-CAM Enabled</span>
+    </div>
+
+    <main class="dashboard-main">
+        <div class="workspace">
+            <!-- Left Side: Upload -->
+            <div class="workspace-card upload-side">
+                <h2 class="card-title">Upload X-Ray</h2>
+                <div class="upload-area" id="upload-area">
+                    <input type="file" id="file-input" accept="image/*" hidden>
+                    <div class="placeholder" id="placeholder">
+                        <span class="icon-cloud">☁️</span>
+                        <p class="select-text">Select X-Ray Image</p>
+                        <p class="hint-text">Supported: JPG, PNG, DICOM</p>
+                    </div>
+                    <img id="image-preview" src="#" alt="Preview" style="display: none;">
+                </div>
+
+                <p id="file-name-display"
+                    style="margin-top: 10px; color: #64748b; font-size: 0.9rem; font-weight: 500;"></p>
+
+                <button class="btn-analyze" id="upload-btn" disabled>Analyze Image</button>
+
+                <p style="text-align: center; margin-top: 15px;">
+                    <a href="/reports"
+                        style="color: #2b459d; font-size: 0.85rem; font-weight: 600; text-decoration: none;">View Past
+                        Reports →</a>
+                </p>
+
+                <!-- New Analysis Report Section -->
+                <div id="analysis-report-section"
+                    style="display: none; text-align: left; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+                    <h3 style="font-size: 1.1rem; font-weight: 700; color: #2b459d; margin-bottom: 20px;">Analysis
+                        Report</h3>
+
+                    <div id="risk-indicator" class="risk-indicator-box" style="display: none;">
+                        <p id="risk-text" style="font-size: 0.95rem; margin-bottom: 0;"></p>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label
+                            style="display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 4px;">Prediction</label>
+                        <p id="prediction-text" style="font-size: 1rem; font-weight: 600; color: #1e293b;"></p>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label
+                            style="display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 4px;">Confidence</label>
+                        <p id="probability-text" style="font-size: 1rem; font-weight: 600; color: #1e293b;"></p>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 4px;">TB
+                            Probability</label>
+                        <p id="tb-probability-text" style="font-size: 1rem; font-weight: 600; color: #1e293b;"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Visual Side -->
+            <div class="workspace-card visual-side">
+                <!-- Placeholder (Before Analysis) -->
+                <div class="visual-placeholder" id="visual-placeholder">
+                    <span class="icon-img">🖼️</span>
+                    <h3 class="visual-title">Visual Explanations (Grad-CAM)</h3>
+                    <p class="visual-text">Upload and analyze an X-ray to generate AI-powered heatmaps for clinical
+                        validation.</p>
+                </div>
+
+                <!-- Analysis Results (After Analysis) -->
+                <div class="results-view" id="results-view" style="display: none;">
+                    <h3
+                        style="text-align: center; font-size: 1.25rem; font-weight: 700; color: #2b459d; margin-bottom: 30px;">
+                        Visual Explanations (Grad-CAM)</h3>
+
+                    <div class="image-workspace">
+                        <div class="image-box">
+                            <span class="img-tag"
+                                style="text-align: center; display: block; margin-bottom: 15px; color: #2b459d;">Original
+                                X-Ray</span>
+                            <img id="original-crop" src="" alt="Original">
+                        </div>
+                        <div class="image-box">
+                            <span class="img-tag"
+                                style="text-align: center; display: block; margin-bottom: 15px; color: #2b459d;">AI
+                                Heatmap</span>
+                            <img id="gradcam-image" src="" alt="Grad-CAM">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="loading" class="loading-workspace" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>AI is processing the image...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

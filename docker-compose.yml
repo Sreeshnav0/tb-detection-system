@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  tb-detection:
+    build:
+      context: .
+    image: tb-detection:latest
+    ports:
+      - "5005:5005"
+    environment:
+      - PORT=5005
+    volumes:
+      - ./uploads:/app/uploads
+      - ./static/gradcam:/app/static/gradcam
+    restart: unless-stopped

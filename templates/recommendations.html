@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Recommendations - TB Detection AI</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=1.2">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <div class="logo-box">
+                <span class="logo-icon">🫁</span>
+                <div class="logo-text">
+                    <span class="brand-name">TB Detection AI</span>
+                    <span class="brand-subtext">AI-Powered Clinical Decision Support</span>
+                </div>
+            </div>
+        </div>
+
+        <ul class="nav-links">
+            <li><a href="/" onclick="window.location.href='/'; return true;">Dashboard</a></li>
+            <li><a href="/reports" onclick="window.location.href='/reports'; return true;">Reports</a></li>
+            <li class="active"><a href="/recommendations"
+                    onclick="window.location.href='/recommendations'; return true;">Recommendations</a></li>
+            <li><a href="/about" onclick="window.location.href='/about'; return true;">About</a></li>
+        </ul>
+
+        <div class="nav-user">
+            <span class="user-welcome">Welcome, {{ session['username'] }}</span>
+            <a href="/logout" class="btn-signout">Sign Out</a>
+        </div>
+    </nav>
+
+    <main class="dashboard-main">
+        <div class="recommendation-container">
+            <div class="workspace-card" style="padding: 40px; background: white; min-height: 500px;">
+                <h2 class="card-title">Clinical Recommendations</h2>
+
+                {% if report %}
+                <div class="latest-summary"
+                    style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #f1f5f9;">
+                    <p style="font-size: 0.95rem; color: #64748b; margin-bottom: 10px;">Latest Prediction: <span
+                            style="font-weight: 700; color: {{ '#ef4444' if report.prediction == 'Tuberculosis' else '#10b981' }}">{{
+                            report.prediction }}</span></p>
+                    <p style="font-size: 0.95rem; color: #64748b;">Risk Level: <span style="font-weight: 700;">{{
+                            report.risk_level }}</span></p>
+                </div>
+
+                <div class="advice-box {{ report.risk_level.lower().replace(' ', '-') }}">
+                    <div class="advice-header">
+                        <span class="advice-icon">📋</span>
+                        <h3 class="advice-title">Medical Advice</h3>
+                    </div>
+
+                    <ul class="advice-list">
+                        {% if 'High' in report.risk_level %}
+                        <li><span class="check-icon">⚡</span> Immediate specialist consultation required</li>
+                        <li><span class="check-icon">🧪</span> Baseline sputum (AFB/GeneXpert) tests needed</li>
+                        <li><span class="check-icon">🏥</span> Isolate and initiate DOTS protocol under supervision</li>
+                        {% elif 'Moderate' in report.risk_level %}
+                        <li><span class="check-icon">🔍</span> Clinical correlation with symptoms advised</li>
+                        <li><span class="check-icon">⚕️</span> Consider sputum examination for clarification</li>
+                        <li><span class="check-icon">📅</span> Schedule follow-up X-ray in 2 weeks</li>
+                        {% else %}
+                        <li><span class="check-icon">✔️</span> Routine annual screening recommended</li>
+                        <li><span class="check-icon">🥗</span> Maintain a healthy lifestyle and proper ventilation</li>
+                        <li><span class="check-icon">😌</span> No immediate clinical action required for TB</li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <p style="margin-top: 40px; font-size: 0.85rem; color: #94a3b8; font-style: italic;">
+                    Based on analysis from: Most recent upload ({{ report.date }})
+                </p>
+                {% else %}
+                <div style="text-align: center; padding: 60px; color: #64748b;">
+                    <span style="font-size: 3rem; display: block; margin-bottom: 20px;">ℹ️</span>
+                    <h3>No Analysis Found</h3>
+                    <p>Please upload and analyze an X-ray on the dashboard to see clinical recommendations.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

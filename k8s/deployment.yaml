@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tb-detection-app
+  labels:
+    app: tb-detection
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tb-detection
+  template:
+    metadata:
+      labels:
+        app: tb-detection
+    spec:
+      containers:
+        - name: tb-detection
+          image: tb-detection:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5005
+          env:
+            - name: PORT
+              value: "5005"
+          volumeMounts:
+            - name: uploads
+              mountPath: /app/uploads
+            - name: gradcam
+              mountPath: /app/static/gradcam
+      volumes:
+        - name: uploads
+          emptyDir: {}
+        - name: gradcam
+          emptyDir: {}
