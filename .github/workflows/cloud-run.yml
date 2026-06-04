@@ -1,0 +1,42 @@
+name: Deploy to Google Cloud Run
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Set up gcloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: '${{ secrets.GCP_PROJECT }}'
+          install_components: 'gcloud-beta'
+
+      - name: Configure Cloud Run region
+        run: gcloud config set run/region '${{ secrets.GCP_REGION }}'
+
+      - name: Build and deploy to Cloud Run
+        run: |
+          IMAGE=gcr.io/${{ secrets.GCP_PROJECT }}/tb-detection:${{ github.sha }}
+          gcloud builds submit --tag "$IMAGE" .
+          gcloud run deploy tb-detection \
+            --image "$IMAGE" \
+            --platform managed \
+            --region "${{ secrets.GCP_REGION }}" \
+            --allow-unauthenticated \
+            --port 5005
+
+      - name: Print deployed URL
+        run: |
+          echo "Deployed to Cloud Run in project ${{ secrets.GCP_PROJECT }}"
+          gcloud run services describe tb-detection --region "${{ secrets.GCP_REGION }}" --format='value(status.url)'
